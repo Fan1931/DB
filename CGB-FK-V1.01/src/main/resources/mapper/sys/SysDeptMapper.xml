@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.cy.pj.sys.dao.SysDeptDao">
+
+    <update id="updateObject" 
+       parameterType="com.cy.pj.sys.entity.SysDept">
+         update sys_depts
+         set
+           name=#{name},
+           sort=#{sort},
+           note=#{note},
+           parentId=#{parentId},
+           modifiedUser=#{modifiedUser},
+           modifiedTime=now()
+        where id=#{id}
+    </update>
+    
+    <insert id="insertObject" parameterType="com.cy.pj.sys.entity.SysDept">
+         insert into sys_depts
+         (name,sort,note,parentId,createdTime,modifiedTime,createdUser,modifiedUser)
+         values
+         (#{name},#{sort},#{note},#{parentId},now(),now(),#{createdUser},#{modifiedUser})
+    </insert>
+    
+
+    <select id="findZTreeNodes" 
+        resultType="com.cy.pj.common.vo.Node">
+        select id,name,parentId
+        from sys_depts        
+    </select>
+
+    <select id="findObjectById" 
+                resultType="map">
+        select c.*,p.name parentName
+        from sys_depts c left join sys_depts p
+        on c.parentId=p.id
+        where c.id=#{id}
+    </select>
+    
+    <select id="findById"
+            resultType="com.cy.pj.sys.entity.SysDept">
+         select *
+         from sys_depts
+         where id=#{deptId}
+    </select>
+    
+    
+    <select id="getChildCount" resultType="int">
+         select count(*)
+         from sys_depts
+         where parentId=#{id}
+    </select>
+    
+    <delete id="deleteObject">
+        delete 
+        from sys_depts
+        where id=#{id}
+    </delete>
+    
+
+    <!-- 方法一 -->
+    <!-- 
+    <select id="findObjects" resultType="map">
+         select c.*,p.name parentName
+         from sys_menus c left join sys_menus p
+         on c.parentId=p.id
+    </select>
+    -->
+    <!-- 方法二-->
+    <select id="findObjects" resultType="map">
+         select c.*,(select name
+                     from sys_depts p 
+                     where c.parentId=p.id)  parentName
+         from sys_depts c
+    </select>
+    
+</mapper>
+
+
+

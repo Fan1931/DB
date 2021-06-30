@@ -1,0 +1,15 @@
+# Spring
+spring:
+  datasource: 
+    type: com.alibaba.druid.pool.DruidDataSource
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql:///jtsys?useUnicode=true&characterEncoding=utf-8&serverTimezone=GMT
+    username: root
+    password: root   
+
+  thymeleaf:
+    prefix: classpath:/templates/pages/
+    suffix: .html
+    
+mybatis: 
+  mapper-locations: mapper/sys/*.xml

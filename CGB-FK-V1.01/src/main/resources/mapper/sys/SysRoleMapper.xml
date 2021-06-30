@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.cy.pj.sys.dao.SysRoleDao">
+
+
+   <select id="findObjects" resultType="com.cy.pj.common.vo.CheckBox">
+       select id,name
+       from sys_roles
+   </select>
+
+  <update id="updateObject" parameterType="com.cy.pj.sys.entity.SysRole">
+	update sys_roles
+	<set>
+		<if test="name!=null and name!=''">
+			name=#{name},
+		</if>
+		<if test="note!=null and note!=''">
+			note=#{note},
+		</if>
+		<if test="modifiedUser!=null and modifiedUser!=''">
+			modifiedUser=#{modifiedUser},
+		</if>
+		modifiedTime=now()
+	</set>
+	where id=#{id}
+</update>
+     <resultMap type="com.cy.pj.sys.vo.SysRoleMenuVo" 
+                id="roleMenuVo">
+         <!-- property指定的值与resultMap类型中的set方法匹配
+              column 表示上个查询中的字段名
+              select 表示要执行的当前查询 -->
+         <collection 
+              column="id"
+              select="com.cy.pj.sys.dao.SysRoleMenuDao.findMenuIdsByRoleId"
+              property="menuIds">
+         </collection>
+     </resultMap>
+     <select id="findObjectById"
+             resultMap="roleMenuVo">
+           select id,name,note
+           from sys_roles
+           where id=#{id}        
+     </select>
+     <!-- 
+      useGeneratedKeys="true"表示使用自增主键值
+      keyProperty="id"表示将主键值赋值为参数对象的哪个属性 -->
+     <insert id="insertObject"
+             parameterType="com.cy.pj.sys.entity.SysRole"
+             useGeneratedKeys="true"
+             keyProperty="id">
+         insert into sys_roles 
+         (id,name,note,createdTime,modifiedTime,
+         createdUser,modifiedUser) 
+         values
+         (null,#{name},#{note},now(),now(),
+         #{createdUser},#{modifiedUser})
+     </insert>
+  
+     <delete id="deleteObject"
+             parameterType="int">
+     
+        delete from sys_roles
+        where id=#{id}
+     
+     </delete>
+  
+     <sql id="queryWhereId">
+        from sys_roles
+        <where>
+           <if test="name!=null and name!=''">
+              name like concat("%",#{name},"%")
+           </if>
+        </where>
+     </sql>
+    
+     <select id="getRowCount"
+             resultType="int">
+           select count(*)
+           <include refid="queryWhereId"/>     
+     </select>
+     
+     <select id="findPageObjects"
+             resultType="com.cy.pj.sys.entity.SysRole">
+           select *
+           <include refid="queryWhereId"/>
+           order by createdTime desc
+           limit #{startIndex},#{pageSize}        
+     </select>
+</mapper>

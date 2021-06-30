@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.cy.pj.sys.dao.SysUserDao">
+    <update id="updatePassword">
+         update sys_users
+         set password=#{password},
+             salt=#{salt},
+             modifiedTime=now()
+         where id=#{id}
+    </update>
+    <select id="findUserByUserName"
+            resultType="com.cy.pj.sys.entity.SysUser">
+            select *
+            from sys_users
+            where username = #{username}
+    </select>
+    
+    <select id="findObjectById" 
+            resultMap="sysUserDeptVo">
+            select id,username,email,mobile,deptId
+            from sys_users
+            where id=#{id}
+    </select>
+    
+    <update id="updateObject">
+         update sys_users
+         set username=#{username},
+             mobile=#{mobile},
+             email=#{email},
+             deptId=#{deptId},
+             modifiedUser=#{modifiedUser},
+             modifiedTime=now()
+         where id=#{id}
+    </update>
+    
+    <insert id="insertObject"
+            parameterType="com.cy.pj.sys.entity.SysUser"
+            useGeneratedKeys="true"
+            keyProperty="id">
+      insert into sys_users
+      (username,password,deptId,email,mobile,salt,valid,
+      createdTime,modifiedTime,createdUser,modifiedUser)
+      values
+      (#{username},#{password},#{deptId},#{email},#{mobile},#{salt},#{valid},
+      now(),now(),#{createdUser},#{modifiedUser})
+    </insert>
+    
+    
+    <update id="validById">
+        update sys_users
+        set valid=#{valid},
+            modifiedUser=#{modifiedUser},
+            modifiedTime=now()
+        where id=#{id}
+    </update>
+    
+    <sql id="queryWhereId">
+       from sys_users
+       <where>
+           <if test="username!=null and username!=''">
+             username like concat("%",#{username},"%")
+           </if>
+       </where>
+    </sql>
+
+    <resultMap type="com.cy.pj.sys.vo.SysUserDeptVo" 
+               id="sysUserDeptVo">
+            <!-- 关联映射  many2one,one2one -->
+            <association property="sysDept"
+                         column="deptId"
+                         select="com.cy.pj.sys.dao.SysDeptDao.findById">
+            </association>
+    </resultMap>
+    
+    <!-- 系统底层解析此元素时,会将元素信息封装到一个
+    MappedStatement对象中 -->
+    <select id="findPageObjects"
+            resultMap="sysUserDeptVo">
+           select *
+           <include refid="queryWhereId"/>
+           order by createdTime desc
+           limit #{startIndex},#{pageSize}
+    </select>
+   
+    <select id="getRowCount" resultType="int">
+          select count(*)
+          <include refid="queryWhereId"/>
+    </select>
+   
+</mapper>
